@@ -5,14 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Baby Balloon Game</title>
   <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      font-family: 'Comic Sans MS', cursive, sans-serif;
-      background: linear-gradient(135deg, #fceef3 0%, #f9f4f5 50%, #ffdede 100%);
-      user-select: none;
-      touch-action: manipulation;
-    }
+  html, body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  background: linear-gradient(135deg, #ffe4ec 0%, #e0f7fa 100%);
+  user-select: none;
+  touch-action: manipulation;
+}
 
     .balloon {
       position: absolute;
@@ -20,6 +21,7 @@
       width: 70px;
       height: 90px;
       border-radius: 50% 50% 45% 45%;
+	    transform-origin: center center;
       font-size: 36px;
       display: flex;
       justify-content: center;
@@ -60,10 +62,10 @@
 
     @keyframes popEffect {
       0% { transform: scale(1); opacity: 1; }
-      100% { transform: scale(1.5); opacity: 0; }
+      100% { transform: scale(1.6); opacity: 0; }
     }
 
-    #soundToggle, #scoreDisplay, #infoButton, #languageSelect {
+     #scoreDisplay, #infoButton, #languageSelect {
       position: absolute;
       top: 10px;
       background: rgba(255, 255, 255, 0.8);
@@ -81,17 +83,11 @@
       color: #a33;
       text-shadow: 0 0 4px #fff7f7;
     }
-    #soundToggle {
-      right: 140px;
-      cursor: pointer;
-    }
     #infoButton {
-      right: 90px;
+      left: 60px;
       cursor: pointer;
     }
     #languageSelect {
-      right: 190px;
-      width: 50px;
       cursor: pointer;
       font-size: 20px;
       background: transparent;
@@ -153,7 +149,6 @@
     <option value="en">🇬🇧</option>
     <option value="de">🇩🇪</option>
   </select>
-  <button id="soundToggle" aria-label="Toggle Sound" title="Toggle Sound">🔊</button>
   <button id="infoButton" aria-label="Show Rules" title="Show Rules">🧸</button>
   <div id="scoreDisplay" aria-live="polite" aria-atomic="true"></div>
 
@@ -212,10 +207,10 @@
       let highScore = localStorage.getItem("highScore") || 0;
       let soundEnabled = true;
       let hasStarted = false;
-
+	  let gameOver = false;
+	  
       let autoSpawnTimer = null;
 
-      const soundBtn = document.getElementById("soundToggle");
       const scoreDisplay = document.getElementById("scoreDisplay");
       const startText = document.getElementById("startText");
       const infoBtn = document.getElementById("infoButton");
@@ -253,68 +248,79 @@
         updateTexts();
       });
 
-      soundBtn.onclick = () => {
-        soundEnabled = !soundEnabled;
-        soundBtn.textContent = soundEnabled ? "🔊" : "🔇";
-      };
-
       infoBtn.onclick = () => infoPanel.style.display = "block";
       document.getElementById("closeInfo").onclick = () => infoPanel.style.display = "none";
       document.getElementById("restartGame").onclick = () => location.reload();
 
-      function createBalloon(x = null) {
-        const isBad = Math.random() < 0.15;
-        const balloon = document.createElement("div");
-        balloon.className = "balloon " + (isBad ? "bad" : "good");
-        balloon.textContent = isBad ? emojisBad[Math.floor(Math.random()*emojisBad.length)] : emojisGood[Math.floor(Math.random()*emojisGood.length)];
-        balloon.style.backgroundColor = isBad ? colorsBad[Math.floor(Math.random()*colorsBad.length)] : colorsGood[Math.floor(Math.random()*colorsGood.length)];
-        balloon.style.left = (x !== null ? x : Math.random() * (window.innerWidth - 70)) + "px";
-        document.body.appendChild(balloon);
+function createBalloon(x = null) {
+  if (gameOver) return;
 
-        balloon.addEventListener("click", (e) => {
-          e.stopPropagation();
-          balloon.style.animation = "popEffect 0.3s ease forwards";
-          setTimeout(() => balloon.remove(), 300);
-          score += isBad ? -5 : 1;
-          if (score < 0) score = 0;
-          if (score > highScore) {
-            highScore = score;
-            localStorage.setItem("highScore", highScore);
-          }
-          updateTexts();
-          if (score >= 100) winPanel.style.display = "block";
-          resetAutoSpawnTimer();
-        });
+  const isBad = Math.random() < 0.15;
+  const balloon = document.createElement("div");
+  balloon.className = "balloon " + (isBad ? "bad" : "good");
+  balloon.textContent = isBad ? emojisBad[Math.floor(Math.random()*emojisBad.length)] : emojisGood[Math.floor(Math.random()*emojisGood.length)];
+  balloon.style.backgroundColor = isBad ? colorsBad[Math.floor(Math.random()*colorsBad.length)] : colorsGood[Math.floor(Math.random()*colorsGood.length)];
+  balloon.style.left = (x !== null ? x : Math.random() * (window.innerWidth - 70)) + "px";
+  document.body.appendChild(balloon);
 
-        balloon.addEventListener("animationend", () => balloon.remove());
-      }
+  balloon.addEventListener("click", (e) => {
+    if (gameOver) return;
+    e.stopPropagation();
+    balloon.style.animation = "popEffect 0.3s ease forwards";
+    setTimeout(() => balloon.remove(), 300);
+    score += isBad ? -5 : 1;
+    if (score < 0) score = 0;
+    if (score > highScore) {
+      highScore = score;
+      localStorage.setItem("highScore", highScore);
+    }
+    updateTexts();
+    if (score >= 100) {
+      gameOver = true;
+      winPanel.style.display = "block";
+    }
+    resetAutoSpawnTimer();
+  });
 
-      function startIfNeeded() {
-        if (!hasStarted) {
-          hasStarted = true;
-          startText.remove();
-          resetAutoSpawnTimer();
-        } else {
-          resetAutoSpawnTimer();
-        }
-      }
+  balloon.addEventListener("animationend", () => balloon.remove());
+}
 
-      function userInteractionHandler() {
-        startIfNeeded();
-        document.removeEventListener("keydown", userInteractionHandler);
-        document.removeEventListener("click", userInteractionHandler);
-        document.removeEventListener("touchstart", userInteractionHandler);
-      }
+
+function startIfNeeded() {
+  if (gameOver) return;
+  if (!hasStarted) {
+    hasStarted = true;
+    startText.remove();
+  }
+  resetAutoSpawnTimer();
+}
+
 
       document.addEventListener("keydown", (e) => {
         startIfNeeded();
         createBalloon();
       });
       document.addEventListener("click", e => {
+	    if (
+    e.target.closest("#infoButton") ||
+    e.target.closest("#languageSelect") ||
+    e.target.closest("#infoPanel") ||
+    e.target.closest("#winPanel") ||
+    e.target.closest("#closeInfo") ||
+    e.target.closest("#restartGame")
+  ) return;
         startIfNeeded();
         createBalloon(e.clientX);
       });
       document.addEventListener("touchstart", e => {
+	    if (
+    e.target.closest("#infoButton") ||
+    e.target.closest("#languageSelect") ||
+    e.target.closest("#infoPanel") ||
+    e.target.closest("#winPanel") ||
+    e.target.closest("#closeInfo") ||
+    e.target.closest("#restartGame")
+  ) return;
         startIfNeeded();
         if (e.touches.length > 0) createBalloon(e.touches[0].clientX);
       }, { passive: true });
