@@ -1,369 +1,326 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Balon Oyunu</title>
-<style>
-  
-  body {
-    margin: 0;
-    height: 100vh;
-    overflow: hidden;
-    font-family: 'Comic Sans MS', cursive, sans-serif;
-    background: linear-gradient(135deg, #a0d8ef 0%, #fcefee 100%);
-    background-image: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80');
-    background-size: cover;
-    background-position: center;
-  }
-  #game-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    user-select: none;
-  }
-  #start-text {
-    position: absolute;
-    top: 45%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2.2rem;
-    color: #f271b9;
-    text-shadow: 1px 1px 3px #7a496c;
-    pointer-events: none;
-  }
-  .balloon {
-    position: absolute;
-    bottom: 0;
-    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-    width: 60px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2rem;
-    cursor: pointer;
-    box-shadow: inset -5px -10px 10px rgba(255 255 255 / 0.7);
-    transition: transform 0.2s ease;
-    user-select: none;
-  }
-  .balloon.good {
-  }
-  .balloon.bad {
-    border-radius: 40% 60% 20% 80% / 60% 30% 70% 40%;
-    transform-origin: center bottom;
-  }
-  .balloon:hover {
-    transform: scale(1.15);
-  }
-  #score {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    font-size: 1.6rem;
-    color: #6b1a40;
-    background: rgba(255 255 255 / 0.7);
-    padding: 6px 15px;
-    border-radius: 12px;
-    user-select: none;
-    font-weight: bold;
-  }
-  #info-button, #lang-button {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    width: 36px;
-    height: 36px;
-    background: rgba(255 255 255 / 0.7);
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-    font-size: 1.8rem;
-    color: #6b1a40;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 6px;
-    user-select: none;
-  }
-  #info-button {
-    right: 56px;
-  }
-  #buttons-wrapper {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    display: flex;
-    gap: 10px;
-    z-index: 1000;
-  }
-  #info-panel {
-    position: fixed;
-    top: 60px;
-    right: 10px;
-    width: 270px;
-    max-height: 320px;
-    overflow-y: auto;
-    background: rgba(255 255 255 / 0.9);
-    border-radius: 14px;
-    padding: 15px 20px;
-    box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
-    font-size: 0.9rem;
-    line-height: 1.3;
-    color: #4a1f3d;
-    display: none;
-    z-index: 999;
-  }
-  #lang-select {
-    width: 100%;
-    font-size: 1rem;
-    border-radius: 8px;
-    border: 1px solid #6b1a40;
-    padding: 4px 6px;
-    background: #fff;
-    color: #6b1a40;
-  }
-  #game-over {
-    position: absolute;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 2rem;
-    color: #c13e65;
-    background: rgba(255 255 255 / 0.85);
-    border-radius: 18px;
-    padding: 18px 30px;
-    user-select: none;
-    display: none;
-    text-align: center;
-  }
-  #game-over button {
-    margin-top: 15px;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 12px;
-    background: #f271b9;
-    color: #fff;
-    font-size: 1.2rem;
-    cursor: pointer;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Baby Balloon Game</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: linear-gradient(135deg, #fceef3 0%, #f9f4f5 50%, #ffdede 100%);
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .balloon {
+      position: absolute;
+      bottom: 0;
+      width: 70px;
+      height: 90px;
+      border-radius: 50% 50% 45% 45%;
+      font-size: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: floatUp 4s ease-out forwards;
+      pointer-events: auto;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6), transparent 70%);
+      box-shadow: inset -5px -10px 15px rgba(255,255,255,0.3), 0 4px 10px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      cursor: pointer;
+    }
+    .balloon.good {
+      border-radius: 50% 50% 45% 45%;
+    }
+    .balloon.bad {
+      border-radius: 60% 20% 60% 20% / 30% 50% 50% 30%;
+      box-shadow:
+        inset -5px -10px 15px rgba(50,50,50,0.5),
+        0 4px 15px rgba(30,30,30,0.6);
+      font-weight: bold;
+    }
+
+    .balloon::after {
+      content: "";
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      width: 2px;
+      height: 20px;
+      background: #555;
+      transform: translateX(-50%);
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(-100vh); opacity: 0; }
+    }
+
+    @keyframes popEffect {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    #soundToggle, #scoreDisplay, #infoButton, #languageSelect {
+      position: absolute;
+      top: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      border: none;
+      padding: 8px;
+      border-radius: 12px;
+      font-size: 16px;
+      user-select: none;
+      z-index: 1001;
+    }
+
+    #scoreDisplay {
+      right: 10px;
+      font-weight: bold;
+      color: #a33;
+      text-shadow: 0 0 4px #fff7f7;
+    }
+    #soundToggle {
+      right: 140px;
+      cursor: pointer;
+    }
+    #infoButton {
+      right: 90px;
+      cursor: pointer;
+    }
+    #languageSelect {
+      right: 190px;
+      width: 50px;
+      cursor: pointer;
+      font-size: 20px;
+      background: transparent;
+      border: none;
+      user-select: none;
+    }
+
+    #startText {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 32px;
+      color: #444;
+      opacity: 0.8;
+      pointer-events: none;
+      user-select: none;
+      z-index: 1000;
+    }
+
+    #infoPanel, #winPanel {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff9f0;
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      display: none;
+      z-index: 1002;
+      max-width: 320px;
+      font-size: 18px;
+      line-height: 1.3;
+    }
+
+    #infoPanel h2, #winPanel h2 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+
+    #closeInfo, #restartGame {
+      margin-top: 10px;
+      padding: 8px 16px;
+      font-size: 18px;
+      background: #ffd;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
-  <div id="game-container" tabindex="0" aria-label="Balon oyunu">
-    <div id="start-text">Bir tuşa bas!</div>
-    <div id="score">Puan: 0</div>
-    <div id="buttons-wrapper">
-      <button id="info-button" title="Bilgi">i</button>
-      <button id="lang-button" title="Dil Seç">🌐</button>
-    </div>
-    <div id="info-panel" role="region" aria-live="polite" aria-atomic="true">
-      <h3>Oyun Kuralları</h3>
-      <p data-lang-tr>Balonlara tıklayın, puan kazanın. İyi balonlar +10 puan, kötü balonlar -15 puan. 100 puana ulaşınca kazanırsınız!</p>
-      <p data-lang-en>Click balloons to score. Good balloons +10, bad balloons -15. Reach 100 points to win!</p>
-      <p data-lang-de>Klicken Sie auf die Ballons, um Punkte zu erzielen. Gute Ballons +10, schlechte Ballons -15. Erreichen Sie 100 Punkte, um zu gewinnen!</p>
-      <h4>Dil Seçimi</h4>
-      <select id="lang-select" aria-label="Dil seçimi">
-        <option value="tr">Türkçe</option>
-        <option value="en">English</option>
-        <option value="de">Deutsch</option>
-      </select>
-    </div>
-    <div id="game-over">
-      <div data-lang-tr>Oyun bitti! Tebrikler!</div>
-      <div data-lang-en>Game Over! Congratulations!</div>
-      <div data-lang-de>Spiel vorbei! Herzlichen Glückwunsch!</div>
-      <button id="restart-button">Tekrar Oyna</button>
-    </div>
+  <div id="startText"></div>
+  
+  <select id="languageSelect" aria-label="Select Language" title="Select Language">
+    <option value="tr">🇹🇷</option>
+    <option value="en">🇬🇧</option>
+    <option value="de">🇩🇪</option>
+  </select>
+  <button id="soundToggle" aria-label="Toggle Sound" title="Toggle Sound">🔊</button>
+  <button id="infoButton" aria-label="Show Rules" title="Show Rules">🧸</button>
+  <div id="scoreDisplay" aria-live="polite" aria-atomic="true"></div>
+
+  <div id="infoPanel" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+    <h2 id="infoTitle"></h2>
+    <p id="rulesText"></p>
+    <button id="closeInfo"></button>
   </div>
 
-<script>
-(() => {
-  const gameContainer = document.getElementById('game-container');
-  const startText = document.getElementById('start-text');
-  const scoreDisplay = document.getElementById('score');
-  const infoButton = document.getElementById('info-button');
-  const langButton = document.getElementById('lang-button');
-  const infoPanel = document.getElementById('info-panel');
-  const langSelect = document.getElementById('lang-select');
-  const gameOverPanel = document.getElementById('game-over');
-  const restartButton = document.getElementById('restart-button');
+  <div id="winPanel" role="dialog" aria-modal="true" aria-labelledby="winText">
+    <h2 id="winText"></h2>
+    <button id="restartGame"></button>
+  </div>
 
-  const goodEmojis = ['🐶', '🐱', '🐭', '🍎', '🍌', '🍇', '🐰', '🐻', '🍓', '🐥'];
-  const badEmojis = ['💀', '👹', '👺', '🦠', '🐍', '🕷️'];
+  <script>
+    (() => {
+      const LANG = {
+        tr: {
+          start: "Bir balona dokun! 🎈",
+          rulesTitle: "Kurallar",
+          rules: "100 puana ulaşmaya çalış. İyi balonlara dokun: +1 🎉 Kötü balonlardan kaç: -5 😱",
+          close: "Kapat",
+          win: "Tebrikler! Kazandınız 🎉",
+          restart: "Yeniden Oyna",
+          score: "Skor",
+          high: "Rekor"
+        },
+        en: {
+          start: "Touch a balloon! 🎈",
+          rulesTitle: "Rules",
+          rules: "Reach 100 points. Tap good balloons: +1 🎉 Avoid bad ones: -5 😱",
+          close: "Close",
+          win: "Congratulations! You Win 🎉",
+          restart: "Play Again",
+          score: "Score",
+          high: "High Score"
+        },
+        de: {
+          start: "Berühre einen Ballon! 🎈",
+          rulesTitle: "Regeln",
+          rules: "Erreiche 100 Punkte. Gute Ballons tippen: +1 🎉 Schlechte meiden: -5 😱",
+          close: "Schließen",
+          win: "Glückwunsch! Du hast gewonnen 🎉",
+          restart: "Nochmal spielen",
+          score: "Punkte",
+          high: "Rekord"
+        }
+      };
 
-  let score = 0;
-  let gameStarted = false;
-  let gameEnded = false;
-  let lastKeyPressTime = 0;
-  let autoSpawnInterval;
+      let lang = localStorage.getItem("lang") || "tr";
+      const emojisGood = ["🐶", "🐱", "🦄", "🐰", "🐥", "🍎", "🍌", "🍇", "🍓"];
+      const emojisBad = ["👿", "💣", "🕷", "💩"];
+      const colorsGood = ["#ffb3ba", "#bae1ff", "#baffc9", "#ffffba", "#ffdfba"];
+      const colorsBad = ["#666", "#999", "#444"];
+      let score = 0;
+      let highScore = localStorage.getItem("highScore") || 0;
+      let soundEnabled = true;
+      let hasStarted = false;
 
-  let currentLang = 'tr';
+      let autoSpawnTimer = null;
 
-  function updateLangTexts() {
-    document.querySelectorAll('[data-lang-tr]').forEach(el => el.style.display = 'none');
-    document.querySelectorAll('[data-lang-en]').forEach(el => el.style.display = 'none');
-    document.querySelectorAll('[data-lang-de]').forEach(el => el.style.display = 'none');
-    document.querySelectorAll(`[data-lang-${currentLang}]`).forEach(el => el.style.display = '');
-  }
+      const soundBtn = document.getElementById("soundToggle");
+      const scoreDisplay = document.getElementById("scoreDisplay");
+      const startText = document.getElementById("startText");
+      const infoBtn = document.getElementById("infoButton");
+      const infoPanel = document.getElementById("infoPanel");
+      const winPanel = document.getElementById("winPanel");
+      const langSelect = document.getElementById("languageSelect");
 
-  function updateScoreDisplay() {
-    const labels = {tr:'Puan', en:'Score', de:'Punkte'};
-    scoreDisplay.textContent = `${labels[currentLang]}: ${score}`;
-  }
+      const t = (key) => LANG[lang][key];
 
-  function createBalloon(isGood, emoji, leftPos) {
-    const balloon = document.createElement('div');
-    balloon.classList.add('balloon');
-    balloon.classList.add(isGood ? 'good' : 'bad');
-    balloon.style.left = `${leftPos}px`;
-    balloon.style.backgroundColor = isGood ? randomPastelColor() : '#d14a52';
-    balloon.textContent = emoji;
+      startText.textContent = t("start");
 
-    balloon.style.bottom = '0px';
-
-    let pos = 0;
-    const maxHeight = window.innerHeight * 0.8;
-    let popped = false;
-
-    const riseInterval = setInterval(() => {
-      if (popped || gameEnded) {
-        clearInterval(riseInterval);
-        balloon.remove();
-        return;
+      function updateTexts() {
+        document.getElementById("infoTitle").textContent = t("rulesTitle");
+        document.getElementById("rulesText").textContent = t("rules");
+        document.getElementById("closeInfo").textContent = t("close");
+        document.getElementById("winText").textContent = t("win");
+        document.getElementById("restartGame").textContent = t("restart");
+        scoreDisplay.textContent = `${t("score")}: ${score} | ${t("high")}: ${highScore}`;
       }
-      pos += 3;
-      balloon.style.bottom = pos + 'px';
 
-      if (pos > maxHeight) {
-        clearInterval(riseInterval);
-        balloon.remove();
+      function resetAutoSpawnTimer() {
+        if (autoSpawnTimer) clearTimeout(autoSpawnTimer);
+        autoSpawnTimer = setTimeout(() => {
+          if (hasStarted) {
+            createBalloon();
+            resetAutoSpawnTimer();
+          }
+        }, 1000);
       }
-    }, 30);
 
-    balloon.addEventListener('click', () => {
-      if (popped || gameEnded) return;
-      popped = true;
-      balloon.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
-      balloon.style.transform = 'scale(1.7)';
-      balloon.style.opacity = '0';
+      langSelect.value = lang;
+      langSelect.addEventListener("change", () => {
+        lang = langSelect.value;
+        localStorage.setItem("lang", lang);
+        updateTexts();
+      });
 
-      clearInterval(riseInterval);
-      setTimeout(() => balloon.remove(), 300);
+      soundBtn.onclick = () => {
+        soundEnabled = !soundEnabled;
+        soundBtn.textContent = soundEnabled ? "🔊" : "🔇";
+      };
 
-      if (!gameEnded) {
-        score += isGood ? 10 : -15;
-        updateScoreDisplay();
-        checkGameOver();
+      infoBtn.onclick = () => infoPanel.style.display = "block";
+      document.getElementById("closeInfo").onclick = () => infoPanel.style.display = "none";
+      document.getElementById("restartGame").onclick = () => location.reload();
+
+      function createBalloon(x = null) {
+        const isBad = Math.random() < 0.15;
+        const balloon = document.createElement("div");
+        balloon.className = "balloon " + (isBad ? "bad" : "good");
+        balloon.textContent = isBad ? emojisBad[Math.floor(Math.random()*emojisBad.length)] : emojisGood[Math.floor(Math.random()*emojisGood.length)];
+        balloon.style.backgroundColor = isBad ? colorsBad[Math.floor(Math.random()*colorsBad.length)] : colorsGood[Math.floor(Math.random()*colorsGood.length)];
+        balloon.style.left = (x !== null ? x : Math.random() * (window.innerWidth - 70)) + "px";
+        document.body.appendChild(balloon);
+
+        balloon.addEventListener("click", (e) => {
+          e.stopPropagation();
+          balloon.style.animation = "popEffect 0.3s ease forwards";
+          setTimeout(() => balloon.remove(), 300);
+          score += isBad ? -5 : 1;
+          if (score < 0) score = 0;
+          if (score > highScore) {
+            highScore = score;
+            localStorage.setItem("highScore", highScore);
+          }
+          updateTexts();
+          if (score >= 100) winPanel.style.display = "block";
+          resetAutoSpawnTimer();
+        });
+
+        balloon.addEventListener("animationend", () => balloon.remove());
       }
-    });
 
-    gameContainer.appendChild(balloon);
-  }
+      function startIfNeeded() {
+        if (!hasStarted) {
+          hasStarted = true;
+          startText.remove();
+          resetAutoSpawnTimer();
+        } else {
+          resetAutoSpawnTimer();
+        }
+      }
 
-  function randomPastelColor() {
-    const r = Math.floor(150 + Math.random() * 105);
-    const g = Math.floor(150 + Math.random() * 105);
-    const b = Math.floor(150 + Math.random() * 105);
-    return `rgb(${r},${g},${b})`;
-  }
+      function userInteractionHandler() {
+        startIfNeeded();
+        document.removeEventListener("keydown", userInteractionHandler);
+        document.removeEventListener("click", userInteractionHandler);
+        document.removeEventListener("touchstart", userInteractionHandler);
+      }
 
-  function spawnBalloonByKey() {
-    if (gameEnded) return;
-    lastKeyPressTime = Date.now();
-    startText.style.display = 'none';
+      document.addEventListener("keydown", (e) => {
+        startIfNeeded();
+        createBalloon();
+      });
+      document.addEventListener("click", e => {
+        startIfNeeded();
+        createBalloon(e.clientX);
+      });
+      document.addEventListener("touchstart", e => {
+        startIfNeeded();
+        if (e.touches.length > 0) createBalloon(e.touches[0].clientX);
+      }, { passive: true });
 
-    gameStarted = true;
-
-    const isGood = Math.random() > 0.3;
-    const emoji = isGood ? goodEmojis[Math.floor(Math.random() * goodEmojis.length)] : badEmojis[Math.floor(Math.random() * badEmojis.length)];
-    const leftPos = Math.random() * (window.innerWidth - 60);
-
-    createBalloon(isGood, emoji, leftPos);
-  }
-
-  function autoSpawnBalloon() {
-    if (gameEnded) return;
-    if (!gameStarted) return;
-
-    if (Date.now() - lastKeyPressTime > 1000) {
-      lastKeyPressTime = Date.now();
-
-      const isGood = Math.random() > 0.3;
-      const emoji = isGood ? goodEmojis[Math.floor(Math.random() * goodEmojis.length)] : badEmojis[Math.floor(Math.random() * badEmojis.length)];
-      const leftPos = Math.random() * (window.innerWidth - 60);
-
-      createBalloon(isGood, emoji, leftPos);
-    }
-  }
-
-  function checkGameOver() {
-    if (score >= 100) {
-      gameEnded = true;
-      gameOverPanel.style.display = 'block';
-      startText.style.display = 'none';
-      clearInterval(autoSpawnInterval);
-    }
-    else if (score < 0) {
-      score = 0;
-      updateScoreDisplay();
-    }
-  }
-
-  langSelect.addEventListener('change', (e) => {
-    currentLang = e.target.value;
-    updateLangTexts();
-    updateScoreDisplay();
-  });
-
-  infoButton.addEventListener('click', () => {
-    if (infoPanel.style.display === 'block') {
-      infoPanel.style.display = 'none';
-    } else {
-      infoPanel.style.display = 'block';
-      langSelect.value = currentLang;
-    }
-  });
-
-  langButton.addEventListener('click', () => {
-    if (infoPanel.style.display === 'block') {
-      infoPanel.style.display = 'none';
-    } else {
-      infoPanel.style.display = 'block';
-      langSelect.value = currentLang;
-    }
-  });
-
-  restartButton.addEventListener('click', () => {
-    gameEnded = false;
-    score = 0;
-    updateScoreDisplay();
-    gameOverPanel.style.display = 'none';
-    startText.style.display = 'block';
-    infoPanel.style.display = 'none';
-    gameStarted = false;
-  });
-
-  gameContainer.addEventListener('keydown', (e) => {
-    if (gameEnded) return;
-    spawnBalloonByKey();
-  });
-
-  gameContainer.addEventListener('click', (e) => {
-    if (gameEnded) return;
-    if (e.target === gameContainer) {
-      spawnBalloonByKey();
-    }
-  });
-
-  updateLangTexts();
-  updateScoreDisplay();
-
-  autoSpawnInterval = setInterval(autoSpawnBalloon, 500);
-
-  gameContainer.focus();
-})();
-</script>
+      updateTexts();
+    })();
+  </script>
 </body>
 </html>
