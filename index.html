@@ -2,99 +2,318 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Baby Balloons</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Baby Balloon Game</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
-      background: #f0f8ff;
-      font-family: sans-serif;
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: radial-gradient(circle at top left, #ffecf0, #ffd8d8),
+                  radial-gradient(circle at bottom right, #d8f0ff, #a8d0ff);
+      background-blend-mode: screen;
+      user-select: none;
+      touch-action: manipulation;
     }
 
     .balloon {
       position: absolute;
       bottom: 0;
-      font-size: 24px;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      color: white;
-      text-align: center;
-      line-height: 60px;
-      animation: floatUp 3s linear forwards;
-      pointer-events: none;
-      box-shadow: 0 0 8px rgba(0,0,0,0.2);
+      width: 70px;
+      height: 90px;
+      border-radius: 50% 50% 45% 45%;
+      font-size: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: floatUp 4s ease-out forwards;
+      pointer-events: auto;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.6), transparent 70%);
+      box-shadow: inset -5px -10px 15px rgba(255,255,255,0.3), 0 4px 10px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      cursor: pointer;
+    }
+    .balloon.good {
+      border-radius: 50% 50% 45% 45%;
+    }
+    .balloon.bad {
+      border-radius: 60% 20% 60% 20% / 30% 50% 50% 30%;
+      box-shadow:
+        inset -5px -10px 15px rgba(50,50,50,0.5),
+        0 4px 15px rgba(30,30,30,0.6);
+      font-weight: bold;
+    }
+
+    .balloon::after {
+      content: "";
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      width: 2px;
+      height: 20px;
+      background: #555;
+      transform: translateX(-50%);
     }
 
     @keyframes floatUp {
-      0% {
-        transform: translateY(0);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(-100vh);
-        opacity: 0;
-      }
+      0% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(-100vh); opacity: 0; }
     }
 
-    #soundToggle {
+    @keyframes popEffect {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    #soundToggle, #scoreDisplay, #infoButton, #languageSelect {
       position: absolute;
       top: 10px;
-      right: 10px;
-      background: rgba(255, 255, 255, 0.7);
+      background: rgba(255, 255, 255, 0.8);
       border: none;
       padding: 8px;
-      border-radius: 50%;
-      cursor: pointer;
+      border-radius: 12px;
       font-size: 16px;
+      user-select: none;
+      z-index: 1001;
+    }
+
+    #soundToggle { right: 10px; cursor: pointer; }
+    #scoreDisplay { right: 60px; }
+    #infoButton { left: 10px; cursor: pointer; }
+    #languageSelect { left: 70px; }
+
+    #startText {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 32px;
+      color: #444;
+      opacity: 0.8;
+      pointer-events: none;
+      user-select: none;
+      z-index: 1000;
+    }
+
+    #infoPanel, #winPanel {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff9f0;
+      border-radius: 20px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      display: none;
+      z-index: 1002;
+    }
+
+    #infoPanel h2, #winPanel h2 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+
+    #closeInfo, #restartGame {
+      margin-top: 10px;
+      padding: 8px 16px;
+      font-size: 18px;
+      background: #ffd;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
+  <div id="startText"></div>
+  <button id="soundToggle" aria-label="Toggle Sound">🔊</button>
+  <div id="scoreDisplay" aria-live="polite" aria-atomic="true"></div>
+  <button id="infoButton" aria-label="Show Rules">🧸</button>
+  <select id="languageSelect" aria-label="Select Language">
+    <option value="tr">🇹🇷</option>
+    <option value="en">🇬🇧</option>
+    <option value="de">🇩🇪</option>
+  </select>
 
-  <button id="soundToggle">🔊</button>
+  <div id="infoPanel" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+    <h2 id="infoTitle"></h2>
+    <p id="rulesText"></p>
+    <button id="closeInfo"></button>
+  </div>
 
-  <audio id="popSound" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
+  <div id="winPanel" role="dialog" aria-modal="true" aria-labelledby="winText">
+    <h2 id="winText"></h2>
+    <button id="restartGame"></button>
+  </div>
+
+  <audio id="bgMusic" loop preload="auto" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_5e377a13d9.mp3?filename=soft-piano-ambient-11060.mp3" volume="0.15"></audio>
+  <audio id="popSound" src="https://www.soundjay.com/button/button-16.mp3" preload="auto"></audio>
 
   <script>
-    const soundBtn = document.getElementById("soundToggle");
-    const popSound = document.getElementById("popSound");
-    let soundEnabled = true;
+    (() => {
+      const LANG = {
+        tr: {
+          start: "Bir balona dokun! 🎈",
+          rulesTitle: "Kurallar",
+          rules: "100 puana ulaşmaya çalış. İyi balonlara dokun: +1 🎉 Kötü balonlardan kaç: -5 😱",
+          close: "Kapat",
+          win: "Tebrikler! Kazandınız 🎉",
+          restart: "Yeniden Oyna",
+          score: "Skor",
+          high: "Rekor"
+        },
+        en: {
+          start: "Touch a balloon! 🎈",
+          rulesTitle: "Rules",
+          rules: "Reach 100 points. Tap good balloons: +1 🎉 Avoid bad ones: -5 😱",
+          close: "Close",
+          win: "Congratulations! You Win 🎉",
+          restart: "Play Again",
+          score: "Score",
+          high: "High Score"
+        },
+        de: {
+          start: "Berühre einen Ballon! 🎈",
+          rulesTitle: "Regeln",
+          rules: "Erreiche 100 Punkte. Gute Ballons tippen: +1 🎉 Schlechte meiden: -5 😱",
+          close: "Schließen",
+          win: "Glückwunsch! Du hast gewonnen 🎉",
+          restart: "Nochmal spielen",
+          score: "Punkte",
+          high: "Rekord"
+        }
+      };
 
-    soundBtn.addEventListener("click", () => {
-      soundEnabled = !soundEnabled;
-      soundBtn.textContent = soundEnabled ? "🔊" : "🔇";
-    });
+      let lang = localStorage.getItem("lang") || "tr";
+      const emojisGood = ["🐶", "🐱", "🦄", "🐰", "🐥", "🍎", "🍌", "🍇", "🍓"];
+      const emojisBad = ["👿", "💣", "🕷", "💩"];
+      const colorsGood = ["#ffb3ba", "#bae1ff", "#baffc9", "#ffffba", "#ffdfba"];
+      const colorsBad = ["#666", "#999", "#444"];
+      let score = 0;
+      let highScore = localStorage.getItem("highScore") || 0;
+      let soundEnabled = true;
+      let hasStarted = false;
 
-    function getRandomColor() {
-      const colors = ['#ff4d4d', '#4d79ff', '#4dff88', '#ffff4d', '#ff66cc', '#a366ff'];
-      return colors[Math.floor(Math.random() * colors.length)];
-    }
+      let autoSpawnTimer = null;
 
-    function createBalloon(char) {
-      const balloon = document.createElement("div");
-      balloon.className = "balloon";
-      balloon.textContent = char.toUpperCase();
-      balloon.style.left = Math.random() * (window.innerWidth - 60) + "px";
-      balloon.style.backgroundColor = getRandomColor();
-      document.body.appendChild(balloon);
+      const soundBtn = document.getElementById("soundToggle");
+      const scoreDisplay = document.getElementById("scoreDisplay");
+      const startText = document.getElementById("startText");
+      const popSound = document.getElementById("popSound");
+      const infoBtn = document.getElementById("infoButton");
+      const infoPanel = document.getElementById("infoPanel");
+      const winPanel = document.getElementById("winPanel");
+      const langSelect = document.getElementById("languageSelect");
+      const bgMusic = document.getElementById("bgMusic");
 
-      if (soundEnabled) {
-        popSound.currentTime = 0;
-        popSound.play();
+      const t = (key) => LANG[lang][key];
+
+      // Başlangıçta sadece burada startText içerik atanır
+      startText.textContent = t("start");
+
+      function updateTexts() {
+        document.getElementById("infoTitle").textContent = t("rulesTitle");
+        document.getElementById("rulesText").textContent = t("rules");
+        document.getElementById("closeInfo").textContent = t("close");
+        document.getElementById("winText").textContent = t("win");
+        document.getElementById("restartGame").textContent = t("restart");
+        scoreDisplay.textContent = `${t("score")}: ${score} | ${t("high")}: ${highScore}`;
       }
 
-      balloon.addEventListener("animationend", () => {
-        balloon.remove();
+      function resetAutoSpawnTimer() {
+        if (autoSpawnTimer) clearTimeout(autoSpawnTimer);
+        autoSpawnTimer = setTimeout(() => {
+          if (hasStarted) {
+            createBalloon();
+            resetAutoSpawnTimer();
+          }
+        }, 1000);
+      }
+
+      langSelect.value = lang;
+      langSelect.addEventListener("change", () => {
+        lang = langSelect.value;
+        localStorage.setItem("lang", lang);
+        updateTexts();
       });
-    }
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key.length === 1) { 
-        createBalloon(e.key);
+      soundBtn.onclick = () => {
+        soundEnabled = !soundEnabled;
+        soundBtn.textContent = soundEnabled ? "🔊" : "🔇";
+        if(soundEnabled) {
+          bgMusic.play().catch(() => {});
+        } else {
+          bgMusic.pause();
+        }
+      };
+
+      infoBtn.onclick = () => infoPanel.style.display = "block";
+      document.getElementById("closeInfo").onclick = () => infoPanel.style.display = "none";
+      document.getElementById("restartGame").onclick = () => location.reload();
+
+      function playSound() {
+        if (soundEnabled) {
+          popSound.currentTime = 0;
+          popSound.play().catch(() => {});
+        }
       }
-    });
+
+      function createBalloon(x = null) {
+        const isBad = Math.random() < 0.15;
+        const balloon = document.createElement("div");
+        balloon.className = "balloon " + (isBad ? "bad" : "good");
+        balloon.textContent = isBad ? emojisBad[Math.floor(Math.random()*emojisBad.length)] : emojisGood[Math.floor(Math.random()*emojisGood.length)];
+        balloon.style.backgroundColor = isBad ? colorsBad[Math.floor(Math.random()*colorsBad.length)] : colorsGood[Math.floor(Math.random()*colorsGood.length)];
+        balloon.style.left = (x !== null ? x : Math.random() * (window.innerWidth - 70)) + "px";
+        document.body.appendChild(balloon);
+
+        balloon.addEventListener("click", (e) => {
+          e.stopPropagation();
+          balloon.style.animation = "popEffect 0.3s ease forwards";
+          setTimeout(() => balloon.remove(), 300);
+          playSound();
+          score += isBad ? -5 : 1;
+          if (score < 0) score = 0;
+          if (score > highScore) {
+            highScore = score;
+            localStorage.setItem("highScore", highScore);
+          }
+          updateTexts();
+          if (score >= 100) winPanel.style.display = "block";
+          resetAutoSpawnTimer();
+        });
+
+        balloon.addEventListener("animationend", () => balloon.remove());
+      }
+
+      function startIfNeeded() {
+        if (!hasStarted) {
+          hasStarted = true;
+          startText.remove();
+          bgMusic.volume = 0.15;
+          if(soundEnabled) bgMusic.play().catch(() => {});
+          resetAutoSpawnTimer();
+        } else {
+          resetAutoSpawnTimer();
+        }
+      }
+
+      document.addEventListener("keydown", () => {
+        startIfNeeded();
+        createBalloon();
+      });
+      document.addEventListener("click", e => {
+        startIfNeeded();
+        createBalloon(e.clientX);
+      });
+      document.addEventListener("touchstart", e => {
+        startIfNeeded();
+        if (e.touches.length > 0) createBalloon(e.touches[0].clientX);
+      }, { passive: true });
+
+      updateTexts();
+    })();
   </script>
 </body>
 </html>
