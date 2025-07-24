@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Baby Balloons</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #f0f8ff;
+      font-family: sans-serif;
+    }
+
+    .balloon {
+      position: absolute;
+      bottom: 0;
+      font-size: 24px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      color: white;
+      text-align: center;
+      line-height: 60px;
+      animation: floatUp 3s linear forwards;
+      pointer-events: none;
+      box-shadow: 0 0 8px rgba(0,0,0,0.2);
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100vh);
+        opacity: 0;
+      }
+    }
+
+    #soundToggle {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.7);
+      border: none;
+      padding: 8px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <button id="soundToggle">🔊</button>
+
+  <audio id="popSound" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
+
+  <script>
+    const soundBtn = document.getElementById("soundToggle");
+    const popSound = document.getElementById("popSound");
+    let soundEnabled = true;
+
+    soundBtn.addEventListener("click", () => {
+      soundEnabled = !soundEnabled;
+      soundBtn.textContent = soundEnabled ? "🔊" : "🔇";
+    });
+
+    function getRandomColor() {
+      const colors = ['#ff4d4d', '#4d79ff', '#4dff88', '#ffff4d', '#ff66cc', '#a366ff'];
+      return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    function createBalloon(char) {
+      const balloon = document.createElement("div");
+      balloon.className = "balloon";
+      balloon.textContent = char.toUpperCase();
+      balloon.style.left = Math.random() * (window.innerWidth - 60) + "px";
+      balloon.style.backgroundColor = getRandomColor();
+      document.body.appendChild(balloon);
+
+      if (soundEnabled) {
+        popSound.currentTime = 0;
+        popSound.play();
+      }
+
+      balloon.addEventListener("animationend", () => {
+        balloon.remove();
+      });
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key.length === 1) { 
+        createBalloon(e.key);
+      }
+    });
+  </script>
+</body>
+</html>
