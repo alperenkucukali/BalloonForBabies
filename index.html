@@ -9,9 +9,8 @@
       margin: 0;
       overflow: hidden;
       font-family: 'Comic Sans MS', cursive, sans-serif;
-      background: radial-gradient(circle at top left, #ffecf0, #ffd8d8),
-                  radial-gradient(circle at bottom right, #d8f0ff, #a8d0ff);
-      background-blend-mode: screen;
+      /* Daha sıcak, yumuşak pastel degrade arka plan */
+      background: linear-gradient(135deg, #fceef3 0%, #f9f4f5 50%, #ffdede 100%);
       user-select: none;
       touch-action: manipulation;
     }
@@ -77,10 +76,29 @@
       z-index: 1001;
     }
 
-    #soundToggle { right: 10px; cursor: pointer; }
-    #scoreDisplay { right: 60px; }
-    #infoButton { left: 10px; cursor: pointer; }
-    #languageSelect { left: 70px; }
+    #scoreDisplay {
+      right: 10px;
+      font-weight: bold;
+      color: #a33;
+      text-shadow: 0 0 4px #fff7f7;
+    }
+    #soundToggle {
+      right: 140px;
+      cursor: pointer;
+    }
+    #infoButton {
+      right: 90px;
+      cursor: pointer;
+    }
+    #languageSelect {
+      right: 190px;
+      width: 50px;
+      cursor: pointer;
+      font-size: 20px;
+      background: transparent;
+      border: none;
+      user-select: none;
+    }
 
     #startText {
       position: absolute;
@@ -107,6 +125,9 @@
       box-shadow: 0 0 20px rgba(0,0,0,0.2);
       display: none;
       z-index: 1002;
+      max-width: 320px;
+      font-size: 18px;
+      line-height: 1.3;
     }
 
     #infoPanel h2, #winPanel h2 {
@@ -127,14 +148,15 @@
 </head>
 <body>
   <div id="startText"></div>
-  <button id="soundToggle" aria-label="Toggle Sound">🔊</button>
-  <div id="scoreDisplay" aria-live="polite" aria-atomic="true"></div>
-  <button id="infoButton" aria-label="Show Rules">🧸</button>
-  <select id="languageSelect" aria-label="Select Language">
+  
+  <select id="languageSelect" aria-label="Select Language" title="Select Language">
     <option value="tr">🇹🇷</option>
     <option value="en">🇬🇧</option>
     <option value="de">🇩🇪</option>
   </select>
+  <button id="soundToggle" aria-label="Toggle Sound" title="Toggle Sound">🔊</button>
+  <button id="infoButton" aria-label="Show Rules" title="Show Rules">🧸</button>
+  <div id="scoreDisplay" aria-live="polite" aria-atomic="true"></div>
 
   <div id="infoPanel" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
     <h2 id="infoTitle"></h2>
@@ -209,7 +231,7 @@
 
       const t = (key) => LANG[lang][key];
 
-      // Başlangıçta sadece burada startText içerik atanır
+      // Başlangıçta startText metni atanır
       startText.textContent = t("start");
 
       function updateTexts() {
@@ -299,7 +321,14 @@
         }
       }
 
-      document.addEventListener("keydown", () => {
+      function userInteractionHandler() {
+        startIfNeeded();
+        document.removeEventListener("keydown", userInteractionHandler);
+        document.removeEventListener("click", userInteractionHandler);
+        document.removeEventListener("touchstart", userInteractionHandler);
+      }
+
+      document.addEventListener("keydown", (e) => {
         startIfNeeded();
         createBalloon();
       });
